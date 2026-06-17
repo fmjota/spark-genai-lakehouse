@@ -1,0 +1,16 @@
+.git
+.github
+.venv
+.ruff_cache
+.pytest_cache
+__pycache__
+data
+lakehouse
+spark-warehouse
+metastore_db
+derby.log
+docs
+iac
+tests
+*.md
+!README.md

@@ -106,5 +106,21 @@ uv run ruff check . && uv run ruff format --check .
 
 ## Estado actual
 
-- **Fase 0 — Scaffold** ✅ (pyproject, ruff/pytest, CI con Java 17, pre-commit, smoke test).
-- Fases 1–11 pendientes (ver plan aprobado).
+**Proyecto completo ✅** — 12 commits, 48 tests verdes (mock), contenedor Podman verificado.
+
+- Fase 0 — Scaffold (uv, ruff/pytest, CI con Java, pre-commit) ✅
+- Fase 1 — Config Pydantic multi-dominio (3 YAML) ✅
+- Fase 2 — SparkSession con JDK-21 discovery + Delta ✅
+- Fase 3 — Backends HF + MockBackend + registry singleton ✅
+- Fase 4 — Inferencia vectorizada `mapInPandas` (el crux) ✅
+- Fase 5 — Esquemas Pandera de salida + validación ✅
+- Fase 6 — Lakehouse Delta particionado + time travel ✅
+- Fase 7 — Confianza/calibración (ECE) + drift (PSI/KS) ✅
+- Fase 8 — Pipeline E2E + generador sintético + entrypoint ✅
+- Fase 9 — IaC documentada (EMR/Dataproc + local-spark-submit) ✅
+- Fase 10 — Documentación 3 capas + write-up del crux ✅
+- Fase 11 — Contenedor spark-submit (Podman rootless, JDK 21) ✅
+
+**Nota de entorno:** `python:3.12-slim` ahora es Debian trixie; el contenedor usa
+`openjdk-21-jre-headless` (no 17). El contenedor corrió end-to-end escribiendo la tabla
+Delta en el volumen `./lakehouse` montado.

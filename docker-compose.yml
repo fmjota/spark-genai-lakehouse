@@ -1,0 +1,13 @@
+# Corre el pipeline batch en un contenedor. Compatible con `docker compose` y `podman-compose`.
+# No expone puertos (no es un servicio): ejecuta un job y termina, escribiendo la tabla Delta
+# en el volumen ./lakehouse. La entrada se lee del volumen ./data.
+# La etiqueta `z` relabela para SELinux (Fedora Enforcing); docker la ignora sin problema.
+services:
+  pipeline:
+    build: .
+    environment:
+      - GENAI_BACKEND=${GENAI_BACKEND:-mock}
+    volumes:
+      - ./data:/app/data:z          # entrada (CSV crudo)
+      - ./lakehouse:/app/lakehouse:z # salida (tabla Delta)
+    command: ["--config", "configs/banking.yaml"]
