@@ -1,0 +1,29 @@
+# Dominio banca/retail: clasificar reseñas de productos / noticias financieras.
+# Tarea: sentimiento (señal de riesgo o mercado) a escala.
+domain: banking
+description: "Reseñas de productos y noticias financieras: sentimiento como señal de mercado."
+
+data:
+  raw_path: "data/raw/banking.csv"
+  text_column: "texto"
+  id_column: "id"
+
+model:
+  task: sentiment
+  model_name: "pysentimiento/robertuito-sentiment-analysis"  # sentimiento en español
+  batch_size: 32
+  max_length: 160
+  labels:
+    - POS
+    - NEU
+    - NEG
+
+lakehouse:
+  path: "lakehouse/banking"
+  partition_by: ["domain", "ingest_date"]
+  mode: append
+
+quality:
+  min_confidence: 0.55
+  psi_threshold: 0.2
+  ks_pvalue_threshold: 0.05

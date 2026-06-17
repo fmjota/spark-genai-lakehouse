@@ -1,0 +1,28 @@
+# Dominio salud: estructurar notas clínicas / reportes de eventos adversos.
+# Tarea: NER de fármacos y síntomas (conecta con la experiencia ISP del autor).
+domain: health
+description: "Notas clínicas y reportes de eventos adversos: NER de fármacos y síntomas."
+
+data:
+  raw_path: "data/raw/health.csv"
+  text_column: "texto"
+  id_column: "id"
+
+model:
+  task: ner
+  model_name: "lcampillos/roberta-es-clinical-trials-ner"  # NER clínico en español
+  batch_size: 16
+  max_length: 256
+  entity_types:
+    - FARMACO
+    - SINTOMA
+
+lakehouse:
+  path: "lakehouse/health"
+  partition_by: ["domain", "ingest_date"]
+  mode: append
+
+quality:
+  min_confidence: 0.60
+  psi_threshold: 0.2
+  ks_pvalue_threshold: 0.05

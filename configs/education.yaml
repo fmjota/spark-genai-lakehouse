@@ -1,0 +1,29 @@
+# Dominio educación: análisis a escala de evaluaciones docentes y feedback de estudiantes.
+# Tarea: sentimiento (positivo/neutro/negativo) para detectar cursos en riesgo.
+domain: education
+description: "Evaluaciones docentes y feedback de estudiantes: sentimiento a escala."
+
+data:
+  raw_path: "data/raw/education.csv"
+  text_column: "texto"
+  id_column: "id"
+
+model:
+  task: sentiment
+  model_name: "pysentimiento/robertuito-sentiment-analysis"  # sentimiento en español
+  batch_size: 32
+  max_length: 128
+  labels:
+    - POS
+    - NEU
+    - NEG
+
+lakehouse:
+  path: "lakehouse/education"
+  partition_by: ["domain", "ingest_date"]
+  mode: append
+
+quality:
+  min_confidence: 0.55
+  psi_threshold: 0.2
+  ks_pvalue_threshold: 0.05
