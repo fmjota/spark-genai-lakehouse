@@ -1,0 +1,53 @@
+{
+  "_comentario": "Plantilla DOCUMENTAL de cluster EMR efímero para correr el pipeline. Úsala con: aws emr create-cluster --cli-input-json file://iac/emr-cluster.json. EMR 7.x trae Spark 3.5/4.0 y Java 17. El bootstrap instala las dependencias Python en los nodos.",
+  "Name": "genai-etl",
+  "ReleaseLabel": "emr-7.2.0",
+  "Applications": [{ "Name": "Spark" }],
+  "LogUri": "s3://mi-bucket/emr-logs/",
+  "ServiceRole": "EMR_DefaultRole",
+  "JobFlowRole": "EMR_EC2_DefaultRole",
+  "AutoTerminationPolicy": { "IdleTimeout": 1800 },
+  "Instances": {
+    "InstanceGroups": [
+      {
+        "Name": "Primary",
+        "InstanceRole": "MASTER",
+        "InstanceType": "m5.xlarge",
+        "InstanceCount": 1
+      },
+      {
+        "Name": "Core",
+        "InstanceRole": "CORE",
+        "InstanceType": "m5.xlarge",
+        "InstanceCount": 2
+      }
+    ],
+    "KeepJobFlowAliveWhenNoSteps": false
+  },
+  "BootstrapActions": [
+    {
+      "Name": "instalar-dependencias",
+      "ScriptBootstrapAction": {
+        "Path": "s3://mi-bucket/bootstrap/pip-install.sh",
+        "Args": ["transformers", "torch", "delta-spark", "pandera", "pydantic"]
+      }
+    }
+  ],
+  "Steps": [
+    {
+      "Name": "pipeline-banking",
+      "ActionOnFailure": "TERMINATE_CLUSTER",
+      "HadoopJarStep": {
+        "Jar": "command-runner.jar",
+        "Args": [
+          "spark-submit",
+          "--packages", "io.delta:delta-spark_2.13:4.0.0",
+          "--conf", "spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension",
+          "--conf", "spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog",
+          "scripts/run_pipeline.py",
+          "--config", "configs/banking.yaml"
+        ]
+      }
+    }
+  ]
+}
