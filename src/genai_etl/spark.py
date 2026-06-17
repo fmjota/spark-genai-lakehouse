@@ -83,6 +83,9 @@ def get_spark(app_name: str = "genai-etl", shuffle_partitions: int = 8) -> Spark
         .config("spark.sql.shuffle.partitions", str(shuffle_partitions))
         .config("spark.ui.enabled", "false")
         .config("spark.sql.session.timeZone", "UTC")
+        # Arrow acelera el intercambio JVM↔Python (mapInPandas, toPandas) y materializa
+        # array<struct> como dicts, listo para validar con Pandera.
+        .config("spark.sql.execution.arrow.pyspark.enabled", "true")
         .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
         .config(
             "spark.sql.catalog.spark_catalog",
