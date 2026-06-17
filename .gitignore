@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Entornos / uv
+.venv/
+.python-version.local
+
+# Datos (no se versionan; se generan o descargan con scripts/)
+data/
+*.csv
+*.parquet
+
+# Lakehouse Delta (salida del pipeline)
+lakehouse/
+spark-warehouse/
+metastore_db/
+derby.log
+
+# Modelos / caches de Hugging Face
+.cache/
+hf_cache/
+
+# Caches de herramientas
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
