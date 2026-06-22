@@ -1,11 +1,11 @@
-# Documento técnico — internals del pipeline
+# Documento técnico: el pipeline por dentro
 
-> El README es la vitrina; este documento explica **cómo funciona por dentro y por qué**.
+> El README resume el proyecto; este documento explica cómo funciona por dentro y por qué.
 > El detalle del patrón de inferencia vive aparte en [`spark-genai-udf.md`](spark-genai-udf.md).
 
 ## 1. Finalidad
 
-Estructurar **texto no estructurado a gran escala** con modelos de lenguaje, de forma
+Estructurar texto no estructurado a gran escala con modelos de lenguaje, de forma
 distribuida y sin cuellos de botella, dejando una tabla consultable y auditable. El núcleo
 es agnóstico al dominio: el mismo código sirve a salud (NER de fármacos/síntomas), educación
 y banca (sentimiento) cambiando solo el archivo de config.
@@ -65,8 +65,8 @@ El orquestador `enrich/pipeline.py` encadena 2→6 y devuelve un resumen.
 - **Confianza por extracción**: cada fila lleva `confidence ∈ [0,1]`. `min_confidence` (config)
   marca las extracciones dudosas (`low_confidence`) sin descartarlas.
 - **Calibración honesta**: si hay ground-truth (el set sintético trae `etiqueta_real`), se
-  reporta la **curva de fiabilidad** y el **ECE** (Expected Calibration Error). Sin
-  ground-truth **no se finge** calibración: solo se reporta la distribución de confianza.
+  reporta la curva de fiabilidad y el ECE (Expected Calibration Error). Sin
+  ground-truth no se finge calibración: solo se reporta la distribución de confianza.
 - **Drift**: PSI y test KS sobre la longitud del texto y PSI categórico sobre la mezcla de
   etiquetas, entre un lote de referencia y uno nuevo. Detecta deriva de la distribución de
   entrada antes de confiar en la salida.
@@ -86,5 +86,5 @@ El orquestador `enrich/pipeline.py` encadena 2→6 y devuelve un resumen.
 
 ## 7. Cómo correr
 
-Ver el README (sección "Cómo correr") y `iac/README.md` para el equivalente en cluster. En
-resumen: `uv sync` y `GENAI_BACKEND=mock uv run python scripts/run_pipeline.py --config ...`.
+Ver el README (sección "Cómo correr") y `iac/README.md` para el equivalente en cluster. Lo
+mínimo: `uv sync` y `GENAI_BACKEND=mock uv run python scripts/run_pipeline.py --config ...`.

@@ -7,7 +7,7 @@ Complementa los docstrings de cada módulo. Mantener sincronizado con el código
 | Archivo | Propósito | Inputs | Outputs | Depende de |
 |---|---|---|---|---|
 | `config.py` | Esquema Pydantic del config de dominio y `load_config()` | ruta YAML | `DomainConfig` | pydantic, pyyaml |
-| `spark.py` | Fábrica de SparkSession con JDK 17/21 + extensión Delta + Arrow | — | `SparkSession` | pyspark, delta |
+| `spark.py` | Fábrica de SparkSession con JDK 17/21 + extensión Delta + Arrow | ninguno | `SparkSession` | pyspark, delta |
 | `ingest/reader.py` | Lee texto crudo y lo normaliza a `id, text` | `SparkSession`, `DomainConfig` | DataFrame Spark | pyspark |
 | `models/backends.py` | Backends `mock`/`hf` (sentimiento, NER) + selección por env | `texts` | `list[dict]` por texto | transformers (lazy) |
 | `models/registry.py` | Cache singleton del backend (una carga por executor) | task, model_name | `HFBackend` | backends |

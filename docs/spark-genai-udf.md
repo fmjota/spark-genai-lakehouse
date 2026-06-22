@@ -1,12 +1,12 @@
 # El patrón HF-en-Spark sin cuellos de botella
 
-Este es el corazón del proyecto: cómo correr modelos de Hugging Face sobre Spark a gran
-escala **sin** que la inferencia se vuelva el cuello de botella. Vale la pena entenderlo a
-fondo porque es exactamente lo que se defiende en entrevista.
+Este es el componente central del proyecto: cómo correr modelos de Hugging Face sobre Spark
+a gran escala sin que la inferencia se vuelva el cuello de botella. Vale la pena entenderlo
+a fondo porque es exactamente lo que se defiende en entrevista.
 
 ## El problema
 
-La forma ingenua —una UDF de Python que recibe una fila, carga el modelo y predice— tiene
+La forma ingenua (una UDF de Python que recibe una fila, carga el modelo y predice) tiene
 tres patologías que matan el rendimiento:
 
 1. **Serialización fila a fila** entre la JVM (donde vive Spark) y el proceso Python.
@@ -17,10 +17,10 @@ tres patologías que matan el rendimiento:
 
 ### 1. `mapInPandas` (Arrow) en vez de UDF fila a fila
 
-`DataFrame.mapInPandas` entrega a la función un **iterador de `pandas.DataFrame`** por
-partición, moviendo los datos en bloques **Apache Arrow** (formato columnar). En lugar de
+`DataFrame.mapInPandas` entrega a la función un iterador de `pandas.DataFrame` por
+partición, moviendo los datos en bloques Apache Arrow (formato columnar). En lugar de
 cruzar la frontera JVM↔Python una vez por fila, se cruza una vez por bloque, y el modelo
-recibe **lotes** de texto.
+recibe lotes de texto.
 
 ```python
 # src/genai_etl/models/inference.py
@@ -29,9 +29,9 @@ return df.mapInPandas(mapper, schema=output_schema(cfg.model.task))
 
 ### 2. Singleton del modelo por executor
 
-El modelo se obtiene de un **registry con cache a nivel de módulo**. Como cada proceso
-worker de Python importa el módulo una sola vez, los pesos se cargan **una vez por
-executor**, no por fila ni por partición:
+El modelo se obtiene de un registry con cache a nivel de módulo. Como cada proceso
+worker de Python importa el módulo una sola vez, los pesos se cargan una vez por
+executor, no por fila ni por partición:
 
 ```python
 # src/genai_etl/models/registry.py
@@ -44,7 +44,7 @@ def get_backend(task, model_name, mode=None):
     return _BACKENDS[key]
 ```
 
-Clave: al worker solo viaja el **`model_name` (un string)**, nunca el objeto del modelo. No
+Clave: al worker solo viaja el `model_name` (un string), nunca el objeto del modelo. No
 se hace `broadcast` de los pesos (pickling de un modelo de torch es costoso y frágil); cada
 worker construye/lee su copia desde la cache local de Hugging Face.
 
@@ -56,8 +56,8 @@ y throughput estable.
 
 ### 4. Un hilo de torch por worker
 
-Spark ya paraleliza por **particiones → executors**. Si además cada proceso de torch abre N
-hilos, hay **sobre-suscripción** de CPU y el rendimiento cae. Por eso, en backends reales:
+Spark ya paraleliza por particiones y executors. Si además cada proceso de torch abre N
+hilos, hay sobre-suscripción de CPU y el rendimiento cae. Por eso, en backends reales:
 
 ```python
 import torch
@@ -77,13 +77,13 @@ torch.set_num_threads(1)   # el paralelismo lo da Spark, no torch
 ## Por qué escala (el argumento de entrevista)
 
 El paralelismo lo aporta Spark: más datos → más particiones → más executors. Dentro de cada
-partición, HF corre en lotes vectorizados con el modelo cargado **una sola vez por proceso**.
-El **mismo código** corre en `local[*]` (laptop) y en EMR/Dataproc cambiando solo el master
-y el número de workers — no hay reescritura. Escalar es añadir workers.
+partición, HF corre en lotes vectorizados con el modelo cargado una sola vez por proceso.
+El mismo código corre en `local[*]` (laptop) y en EMR/Dataproc cambiando solo el master
+y el número de workers, sin reescritura. Escalar es añadir workers.
 
 ## El MockBackend (por qué los tests no descargan nada)
 
 `GENAI_BACKEND` selecciona el backend: `mock` (determinista, por reglas de palabras clave,
 sin red ni GPU), `hf` (modelos reales) o `auto`. Tests y CI usan `mock`, igual que el
-patrón `HEALER_BACKEND` del Proyecto 3: el flujo completo —ingesta, UDF, validación,
-calidad, escritura Delta— se ejercita sin descargar un solo modelo, y de forma reproducible.
+patrón `HEALER_BACKEND` del proyecto `self-healing-etl`: el flujo completo (ingesta, UDF, validación,
+calidad, escritura Delta) se ejercita sin descargar un solo modelo, y de forma reproducible.

@@ -1,24 +1,24 @@
-# Podman vs Docker — por qué y cómo se ejecuta aquí
+# Podman vs Docker: por qué y cómo se ejecuta aquí
 
-Este proyecto se empaqueta con un `Dockerfile` y un `docker-compose.yml` **estándar OCI**, y
-se **ejecuta con Podman**. A diferencia de la API del Proyecto 1, aquí el contenedor corre un
-**job batch** (spark-submit): se ejecuta, escribe la tabla Delta en el volumen montado y
-termina. Por eso **necesita Java** (Spark 4.x) además de Python, y **no expone puertos**.
+Este proyecto se empaqueta con un `Dockerfile` y un `docker-compose.yml` estándar OCI, y
+se ejecuta con Podman. A diferencia de la API del proyecto `calibrated-mlops-pipeline`, aquí el contenedor corre un
+job batch (spark-submit): se ejecuta, escribe la tabla Delta en el volumen montado y
+termina. Por eso necesita Java (Spark 4.x) además de Python, y no expone puertos.
 
 ## Qué son
 
-- **Docker.** Usa un **daemon** central (`dockerd`) que corre como **root**.
-- **Podman.** Motor OCI **sin daemon** y **rootless** por defecto; CLI casi idéntica y lee los
+- **Docker.** Usa un daemon central (`dockerd`) que corre como root.
+- **Podman.** Motor OCI sin daemon y rootless por defecto; CLI casi idéntica y lee los
   mismos `Dockerfile`/`docker-compose.yml`.
 
 ## Diferencias clave
 
 | Aspecto | Docker | Podman |
 |---|---|---|
-| Arquitectura | Daemon central (`dockerd`) | **Sin daemon**: cada contenedor es un proceso hijo |
-| Privilegios | El daemon corre como root | **Rootless** por defecto (más seguro) |
+| Arquitectura | Daemon central (`dockerd`) | Sin daemon: cada contenedor es un proceso hijo |
+| Privilegios | El daemon corre como root | Rootless por defecto (más seguro) |
 | Compose | `docker compose` (plugin v2) | `podman-compose` o `podman compose` |
-| Integración Fedora/RHEL | Repo externo | **Incluido y soportado** |
+| Integración Fedora/RHEL | Repo externo | Incluido y soportado |
 | Imágenes/Registros | OCI | OCI (mismas imágenes) |
 
 El formato es el mismo (OCI, `Dockerfile`, `compose`), así que el `docker-compose.yml` de
@@ -26,7 +26,7 @@ este repo funciona en ambos sin cambios.
 
 ## Por qué Podman en este entorno
 
-1. **Fedora 44 ya trae Podman**; Docker no estaba.
+1. Fedora 44 ya trae Podman; Docker no estaba.
 2. **Sin sudo ni daemon root** (rootless): encaja con la regla del proyecto de no tocar el
    sistema sin OK explícito.
 3. **Mismo artefacto**: quien prefiera Docker corre el mismo `docker compose up`.

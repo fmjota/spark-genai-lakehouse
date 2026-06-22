@@ -1,8 +1,8 @@
 # Aprovisionamiento de infraestructura (IaC)
 
-El pipeline es **el mismo código** en la laptop y en un cluster: solo cambia el *master* de
+El pipeline es el mismo código en la laptop y en un cluster: solo cambia el *master* de
 Spark y el aprovisionamiento. Esto evita reescrituras al escalar y es el argumento central
-del proyecto ("Big Data + GenAI sin reventar el rendimiento").
+del proyecto ("Big Data + GenAI sin sacrificar el rendimiento").
 
 | Entorno | Archivo | Master | Cuándo |
 |---|---|---|---|
@@ -29,7 +29,7 @@ lanza `scripts/run_pipeline.py`. Es el equivalente exacto de lo que corre en el 
 aws emr create-cluster --cli-input-json file://iac/emr-cluster.json
 ```
 
-Cluster **efímero** (`KeepJobFlowAliveWhenNoSteps: false` + `AutoTerminationPolicy`): se crea,
+Cluster efímero (`KeepJobFlowAliveWhenNoSteps: false` + `AutoTerminationPolicy`): se crea,
 corre el step y se apaga; se paga solo el tiempo del job. EMR 7.x trae Spark y Java 17; el
 bootstrap instala las dependencias Python en los nodos.
 
@@ -46,6 +46,6 @@ el cluster al terminar.
 ## Notas de costo y rendimiento
 
 - **Clusters efímeros** + auto-apagado: nunca se paga un cluster ocioso.
-- El paralelismo lo da Spark (particiones → workers); el modelo HF se carga **una vez por
-  executor** (ver `docs/spark-genai-udf.md`), así que escalar = añadir workers, sin tocar código.
+- El paralelismo lo da Spark (particiones → workers); el modelo HF se carga una vez por
+  executor (ver `docs/spark-genai-udf.md`), así que escalar = añadir workers, sin tocar código.
 - `GENAI_BACKEND=mock` permite validar el flujo de orquestación sin descargar modelos.
